@@ -18,9 +18,16 @@ To install the extension, run the following command in your environment:
 pip install nblink
 ```
 
+
+
+### Installation on Jupyterlite
+
 If you are [deploying your own jupyterlite instance](https://jupyterlite.readthedocs.io/en/latest/quickstart/deploy.html), you can install nblink by adding it to your requirements.txt. See [adding additional requirements](https://jupyterlite.readthedocs.io/en/latest/quickstart/deploy.html#add-additional-requirements-to-the-deployment) to the deployment.
 
-
+1. Follow the instructions here to deploy your own jupyterlite instance: [Deploying JupyterLite](https://jupyterlite.readthedocs.io/en/latest/quickstart/deploy.html).
+2. Add `nblink` to your requirements.txt file.
+3. Push your changes to github, triggering a new deployment containing the nblink extension.
+4. Confirm the extension is installed by opening a notebook and looking for the "Save to URL" button in the notebook toolbar.
 
 ## Usage
 
