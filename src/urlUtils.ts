@@ -96,19 +96,15 @@ export async function compressNotebookContent(
   let url: URL;
 
   if (settings.urlPath === 'custom' && settings.customUrl) {
-    let customUrl = settings.customUrl;
-    
-    // ensure customURL has http or https
-    if (!customUrl.startsWith('http')) {
-      customUrl = `http://${customUrl}`;
-    }
-
     url = new URL(settings.customUrl);
   } else {
-    const currentUrl = new URL(window.location.href);
-    let baseUrl = currentUrl.origin;
-
-    url = new URL(`${baseUrl}${settings.urlPath}`);
+    const currentUrl = window.location.href;
+    const basePath = getBasePath(currentUrl);
+    
+    // Ensure we're using 'lab' in the path, not 'notebooks'
+    const labPath = settings.urlPath.replace('/notebooks/', '/lab/');
+    
+    url = new URL(`${basePath}${labPath}`);
   }
 
   // Add the hash and query parameters
@@ -128,4 +124,21 @@ export async function compressNotebookContent(
   showToast('Copied to clipboard', anchorEl);
   
   
+}
+
+// gets base path for jupyter lite: 
+export function getBasePath(currentUrl: string): string {
+  const url = new URL(currentUrl);
+  const pathParts = url.pathname.split('/');
+  const labIndex = pathParts.indexOf('lab');
+  const notebooksIndex = pathParts.indexOf('notebooks');
+
+  if (labIndex !== -1) {
+    return url.origin + pathParts.slice(0, labIndex).join('/');
+  } else if (notebooksIndex !== -1) {
+    return url.origin + pathParts.slice(0, notebooksIndex).join('/');
+  }
+
+  // If neither 'lab' nor 'notebooks' is found, return the origin
+  return url.origin;
 }

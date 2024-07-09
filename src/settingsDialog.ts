@@ -1,4 +1,5 @@
 import { Widget } from '@lumino/widgets';
+import { getBasePath } from './urlUtils';
 
 export class SettingsDialog extends Widget {
     private settings: {
@@ -64,7 +65,7 @@ export class SettingsDialog extends Widget {
     const paths = [
       { label: 'JupyterLite', value: '/jupyterlite/lab/index.html', openAsNotebook: false },
       { label: 'JupyterLite Notebook', value: '/jupyterlite/lab/index.html', openAsNotebook: true },
-      { label: 'JupyterLab', value: '/lab/index.html', openAsNotebook: false },
+      //{ label: 'JupyterLab', value: '/lab/index.html', openAsNotebook: false },
       { label: 'Custom', value: 'custom', openAsNotebook: false }
     ];
 
@@ -147,14 +148,13 @@ export class SettingsDialog extends Widget {
   }
 
   private updateUrlDisplay(element: HTMLElement) {
-    const currentUrl = new URL(window.location.href);
-    let baseUrl = currentUrl.origin;
-    
     if (this.settings.urlPath === 'custom' && this.settings.customUrl) {
       element.textContent = `Links to: ${this.settings.customUrl}`;
     } else {
-      
-      element.textContent = `Links to: ${baseUrl}${this.settings.urlPath}`;
+      const currentUrl = window.location.href;
+      const basePath = getBasePath(currentUrl);
+      const labPath = this.settings.urlPath.replace('/notebooks/', '/lab/');
+      element.textContent = `Links to: ${basePath}${labPath}`;
     }
   }
 
