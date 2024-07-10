@@ -26,11 +26,14 @@ export class SettingsDialog extends Widget {
     }
   ) {
     super();
-    this.settings = { ...initialSettings };
+    const savedSettings = this.loadSettingsFromStorage();
+    this.settings = savedSettings || { ...initialSettings };
     this.container = document.createElement('div');
     this.node.appendChild(this.container);
     this.buildDialog();
   }
+
+  
 
   private buildDialog() {
     this.container.innerHTML = '';
@@ -63,8 +66,8 @@ export class SettingsDialog extends Widget {
     urlPathSelect.style.border = '1px solid #ccc';
 
     const paths = [
-      { label: 'JupyterLite', value: '/jupyterlite/lab/index.html', openAsNotebook: false },
-      { label: 'JupyterLite Notebook', value: '/jupyterlite/lab/index.html', openAsNotebook: true },
+      { label: 'JupyterLite', value: '/lab/index.html', openAsNotebook: false },
+      { label: 'JupyterLite Notebook', value: '/lab/index.html', openAsNotebook: true },
       //{ label: 'JupyterLab', value: '/lab/index.html', openAsNotebook: false },
       { label: 'Custom', value: 'custom', openAsNotebook: false }
     ];
@@ -81,6 +84,7 @@ export class SettingsDialog extends Widget {
       }
       urlPathSelect.appendChild(option);
     });
+  
 
     this.container.appendChild(urlPathSelect);
 
@@ -111,29 +115,39 @@ export class SettingsDialog extends Widget {
     this.container.appendChild(customDisplay);
 
     urlPathSelect.addEventListener('change', () => {
-        const selectedOption = JSON.parse(urlPathSelect.value);
-        if (selectedOption.value === 'custom') {
-          customUrlInput.style.display = 'block';
-          this.updateSettings({ 
-            urlPath: 'custom', 
-            openAsNotebook: false,
-            customUrl: customUrlInput.value || null
-          });
-
-          customDisplay.style.display = 'block';
-
-
+      const selectedOption = JSON.parse(urlPathSelect.value);
+      
+      if (selectedOption.value === 'custom') {
+        // Custom URL option selected
+        customUrlInput.style.display = 'block';
+        customDisplay.style.display = 'block';
+        
+        // If there's a previously saved custom URL, use it
+        if (this.settings.customUrl) {
+          customUrlInput.value = this.settings.customUrl;
         } else {
-          customUrlInput.style.display = 'none';
-          customDisplay.style.display = 'none';
-          this.updateSettings({ 
-            urlPath: selectedOption.value, 
-            openAsNotebook: selectedOption.openAsNotebook,
-            customUrl: null
-          });
+          customUrlInput.value = ''; // Clear the input if no custom URL was saved
         }
-        this.updateUrlDisplay(urlDisplay);
-      });
+        
+        this.updateSettings({ 
+          urlPath: 'custom', 
+          openAsNotebook: false,
+          customUrl: customUrlInput.value || null
+        });
+      } else {
+        // Standard option selected
+        customUrlInput.style.display = 'none';
+        customDisplay.style.display = 'none';
+        
+        this.updateSettings({ 
+          urlPath: selectedOption.value, 
+          openAsNotebook: selectedOption.openAsNotebook,
+          customUrl: null
+        });
+      }
+      
+      this.updateUrlDisplay(urlDisplay);
+    });
   
       customUrlInput.addEventListener('input', () => {
         this.updateSettings({ 
@@ -204,6 +218,22 @@ export class SettingsDialog extends Widget {
     customUrl: string | null;}>) {
     this.settings = { ...this.settings, ...partialSettings };
     this.onSettingsChange(this.settings);
+    this.saveSettingsToStorage();
+
+  }
+
+  private saveSettingsToStorage() {
+    localStorage.setItem('urlifySettings', JSON.stringify(this.settings));
+  }
+  
+  private loadSettingsFromStorage(): {
+    copyOutput: boolean;
+    urlPath: string;
+    openAsNotebook: boolean;
+    customUrl: string | null;
+  } | null {
+    const savedSettings = localStorage.getItem('urlifySettings');
+    return savedSettings ? JSON.parse(savedSettings) : null;
   }
 
   

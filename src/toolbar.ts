@@ -8,7 +8,7 @@ import { compressNotebookContent } from './urlUtils';
 let settings = {
   copyOutput: false,
   openAsNotebook: true,
-  urlPath: '/jupyterlite/lab/index.html',
+  urlPath: '/lab/index.html',
   customUrl: (null as string | null)
 };
 

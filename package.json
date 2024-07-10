@@ -1,6 +1,6 @@
 {
     "name": "nblink",
-    "version": "0.1.5",
+    "version": "0.1.11",
     "description": "Extension for creating jupyter notebooks from urls.",
     "keywords": [
         "jupyter",

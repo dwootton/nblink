@@ -1,4 +1,4 @@
-# nblink
+# nblink 🔗
 
 ## A JupyterLab Extension for Sharing Notebooks via URL
 

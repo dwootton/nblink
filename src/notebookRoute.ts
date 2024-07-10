@@ -44,12 +44,14 @@ export function addTempNotebookRoute(
               type: 'notebook'
             });
   
-            if (model !== undefined) {
+            if (model !== undefined ) {
+          
               const widget = await app.commands.execute('docmanager:open', {
                 path: model.path,
                 factory: 'Notebook',
                 kernel: { id: kernelId, name: kernelName }
               });
+
   
               widget.isUntitled = true;
               const tempId = `temp-notebook-${UUID.uuid4()}`;
@@ -83,17 +85,29 @@ export function addTempNotebookRoute(
     }
   }
   
-  function redirectToNotebookView(notebookPath: string) {
-    const currentUrl = new URL(window.location.href);
-    let baseUrl = currentUrl.origin;
-    
-    if (currentUrl.pathname.includes('/jupyterlite/')) {
-      baseUrl += '/jupyterlite';
-    }
-    
-    const newUrl = `${baseUrl}/notebooks/index.html?path=${notebookPath}`;
-    window.location.href = newUrl;
-  }
+import { getBasePath } from './urlUtils';
+
+function redirectToNotebookView(notebookPath: string) {
+  const currentUrl = window.location.href;
+  const basePath = getBasePath(currentUrl);
+  
+  // Construct the new URL, ensuring we're using the 'notebooks' path
+  const newUrl = new URL(`${basePath}/notebooks/index.html`);
+  
+  // Add the notebook path as a query parameter
+  newUrl.searchParams.set('path', notebookPath);
+  
+  // // Preserve any existing query parameters
+  // const currentUrlObj = new URL(currentUrl);
+  // currentUrlObj.searchParams.forEach((value, key) => {
+  //   if (key !== 'path') {
+  //     newUrl.searchParams.set(key, value);
+  //   }
+  // });
+
+  // Redirect to the new URL
+  window.location.href = newUrl.toString();
+}
 
   /*
 export function addTempNotebookRoute(
