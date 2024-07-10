@@ -1,5 +1,7 @@
 # nblink 🔗
 
+![2024-07-10 10 31 49](https://github.com/dwootton/nblink/assets/30129761/a19dba61-826e-47bf-ab72-147d65e35f4d)
+
 ## A JupyterLab Extension for Sharing Notebooks via URL
 
 nblink is a JupyterLab extension that allows you to easily share your Jupyter notebooks by encoding their content into a URL. This enables quick sharing and collaboration without the need for file transfers or cloud storage.
