@@ -1,11 +1,15 @@
 import { JupyterFrontEnd, IRouter } from '@jupyterlab/application';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { UUID } from '@lumino/coreutils';
 import { decompressSavedContent } from './urlUtils';
 
 export function addTempNotebookRoute(
   app: JupyterFrontEnd,
+  defaultFileBrowser: IDefaultFileBrowser,
   filebrowserFactory: IFileBrowserFactory,
   router: IRouter
 ): void {
@@ -72,10 +76,8 @@ export function addTempNotebookRoute(
           }
         };
 
-        //@ts-ignore
         const currentBrowser =
-          filebrowserFactory?.tracker.currentWidget ??
-          filebrowserFactory.defaultBrowser;
+          filebrowserFactory?.tracker.currentWidget ?? defaultFileBrowser;
         const cwd =
           (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
         const kernelId = (args['kernelId'] as string) || '';

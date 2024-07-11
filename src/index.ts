@@ -3,7 +3,10 @@ import {
   JupyterFrontEndPlugin,
   IRouter
 } from '@jupyterlab/application';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { addSaveToUrlButton } from './toolbar';
 import { addTempNotebookRoute } from './notebookRoute';
@@ -14,9 +17,15 @@ console.log('nblink extension loading');
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'nblink',
   autoStart: true,
-  requires: [IFileBrowserFactory, IRouter, INotebookTracker],
+  requires: [
+    IDefaultFileBrowser,
+    IFileBrowserFactory,
+    IRouter,
+    INotebookTracker
+  ],
   activate: async (
     app: JupyterFrontEnd,
+    defaultFileBrowser: IDefaultFileBrowser,
     filebrowserFactory: IFileBrowserFactory,
     router: IRouter,
     notebookTracker: INotebookTracker
@@ -32,7 +41,7 @@ const extension: JupyterFrontEndPlugin<void> = {
 
       addSaveToUrlButton(app, notebookTracker);
       saveUrlParameters();
-      await addTempNotebookRoute(app, filebrowserFactory, router);
+      addTempNotebookRoute(app, defaultFileBrowser, filebrowserFactory, router);
 
       console.log('nblink extension activated successfully');
     } catch (error) {
