@@ -2,12 +2,12 @@ import { Widget } from '@lumino/widgets';
 import { getBasePath } from './urlUtils';
 
 export class SettingsDialog extends Widget {
-    private settings: {
-        copyOutput: boolean;
-        urlPath: string;
-        openAsNotebook: boolean;
-        customUrl: string | null;
-      };
+  private settings: {
+    copyOutput: boolean;
+    urlPath: string;
+    openAsNotebook: boolean;
+    customUrl: string | null;
+  };
 
   private container: HTMLDivElement;
 
@@ -33,8 +33,6 @@ export class SettingsDialog extends Widget {
     this.buildDialog();
   }
 
-  
-
   private buildDialog() {
     this.container.innerHTML = '';
     this.container.style.padding = '20px';
@@ -46,7 +44,7 @@ export class SettingsDialog extends Widget {
     const copyOutputSwitch = this.createSwitchControl(
       'Copy notebook output',
       this.settings.copyOutput,
-      (checked) => this.updateSettings({ copyOutput: checked })
+      checked => this.updateSettings({ copyOutput: checked })
     );
     this.container.appendChild(copyOutputSwitch);
 
@@ -67,7 +65,11 @@ export class SettingsDialog extends Widget {
 
     const paths = [
       { label: 'JupyterLite', value: '/lab/index.html', openAsNotebook: false },
-      { label: 'JupyterLite Notebook', value: '/lab/index.html', openAsNotebook: true },
+      {
+        label: 'JupyterLite Notebook',
+        value: '/lab/index.html',
+        openAsNotebook: true
+      },
       //{ label: 'JupyterLab', value: '/lab/index.html', openAsNotebook: false },
       { label: 'Custom', value: 'custom', openAsNotebook: false }
     ];
@@ -77,14 +79,14 @@ export class SettingsDialog extends Widget {
       option.value = JSON.stringify(path);
       option.textContent = path.label;
       if (
-        (path.value === this.settings.urlPath && path.openAsNotebook === this.settings.openAsNotebook) ||
+        (path.value === this.settings.urlPath &&
+          path.openAsNotebook === this.settings.openAsNotebook) ||
         (path.value === 'custom' && this.settings.customUrl !== null)
       ) {
         option.selected = true;
       }
       urlPathSelect.appendChild(option);
     });
-  
 
     this.container.appendChild(urlPathSelect);
 
@@ -100,7 +102,8 @@ export class SettingsDialog extends Widget {
     customUrlInput.type = 'text';
     customUrlInput.placeholder = 'Enter custom URL';
     customUrlInput.style.width = '100%';
-    customUrlInput.style.display = this.settings.customUrl !== null ? 'block' : 'none';
+    customUrlInput.style.display =
+      this.settings.customUrl !== null ? 'block' : 'none';
     customUrlInput.value = this.settings.customUrl || '';
     this.container.appendChild(customUrlInput);
 
@@ -110,27 +113,28 @@ export class SettingsDialog extends Widget {
     customDisplay.style.marginTop = '8px';
     customDisplay.style.marginBottom = '15px';
     customDisplay.style.wordBreak = 'break-all';
-    customDisplay.style.display = this.settings.customUrl !== null ? 'block' : 'none';
+    customDisplay.style.display =
+      this.settings.customUrl !== null ? 'block' : 'none';
     customDisplay.textContent = `Custom urls should link to the /lab/index.html path for your jupyterlab/lite instance.`;
     this.container.appendChild(customDisplay);
 
     urlPathSelect.addEventListener('change', () => {
       const selectedOption = JSON.parse(urlPathSelect.value);
-      
+
       if (selectedOption.value === 'custom') {
         // Custom URL option selected
         customUrlInput.style.display = 'block';
         customDisplay.style.display = 'block';
-        
+
         // If there's a previously saved custom URL, use it
         if (this.settings.customUrl) {
           customUrlInput.value = this.settings.customUrl;
         } else {
           customUrlInput.value = ''; // Clear the input if no custom URL was saved
         }
-        
-        this.updateSettings({ 
-          urlPath: 'custom', 
+
+        this.updateSettings({
+          urlPath: 'custom',
           openAsNotebook: false,
           customUrl: customUrlInput.value || null
         });
@@ -138,27 +142,27 @@ export class SettingsDialog extends Widget {
         // Standard option selected
         customUrlInput.style.display = 'none';
         customDisplay.style.display = 'none';
-        
-        this.updateSettings({ 
-          urlPath: selectedOption.value, 
+
+        this.updateSettings({
+          urlPath: selectedOption.value,
           openAsNotebook: selectedOption.openAsNotebook,
           customUrl: null
         });
       }
-      
+
       this.updateUrlDisplay(urlDisplay);
     });
-  
-      customUrlInput.addEventListener('input', () => {
-        this.updateSettings({ 
-          urlPath: 'custom',
-          openAsNotebook: false,
-          customUrl: customUrlInput.value || null
-        });
-        this.updateUrlDisplay(urlDisplay);
+
+    customUrlInput.addEventListener('input', () => {
+      this.updateSettings({
+        urlPath: 'custom',
+        openAsNotebook: false,
+        customUrl: customUrlInput.value || null
       });
-  
       this.updateUrlDisplay(urlDisplay);
+    });
+
+    this.updateUrlDisplay(urlDisplay);
   }
 
   private updateUrlDisplay(element: HTMLElement) {
@@ -172,7 +176,11 @@ export class SettingsDialog extends Widget {
     }
   }
 
-  private createSwitchControl(label: string, initialState: boolean, onChange: (checked: boolean) => void) {
+  private createSwitchControl(
+    label: string,
+    initialState: boolean,
+    onChange: (checked: boolean) => void
+  ) {
     const container = document.createElement('label');
     container.style.display = 'flex';
     container.style.alignItems = 'center';
@@ -212,20 +220,23 @@ export class SettingsDialog extends Widget {
     return container;
   }
 
-  private updateSettings(partialSettings: Partial<{ copyOutput: boolean;
-    urlPath: string;
-    openAsNotebook: boolean;
-    customUrl: string | null;}>) {
+  private updateSettings(
+    partialSettings: Partial<{
+      copyOutput: boolean;
+      urlPath: string;
+      openAsNotebook: boolean;
+      customUrl: string | null;
+    }>
+  ) {
     this.settings = { ...this.settings, ...partialSettings };
     this.onSettingsChange(this.settings);
     this.saveSettingsToStorage();
-
   }
 
   private saveSettingsToStorage() {
     localStorage.setItem('urlifySettings', JSON.stringify(this.settings));
   }
-  
+
   private loadSettingsFromStorage(): {
     copyOutput: boolean;
     urlPath: string;
@@ -235,6 +246,4 @@ export class SettingsDialog extends Widget {
     const savedSettings = localStorage.getItem('urlifySettings');
     return savedSettings ? JSON.parse(savedSettings) : null;
   }
-
-  
 }

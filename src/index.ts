@@ -1,4 +1,8 @@
-import { JupyterFrontEnd, JupyterFrontEndPlugin, IRouter } from '@jupyterlab/application';
+import {
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin,
+  IRouter
+} from '@jupyterlab/application';
 import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
 import { INotebookTracker } from '@jupyterlab/notebook';
 import { addSaveToUrlButton } from './toolbar';
