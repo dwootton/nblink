@@ -1,102 +1,107 @@
 import { JupyterFrontEnd, IRouter } from '@jupyterlab/application';
-import { IFileBrowserFactory } from '@jupyterlab/filebrowser';
+import {
+  IDefaultFileBrowser,
+  IFileBrowserFactory
+} from '@jupyterlab/filebrowser';
 import { NotebookModel } from '@jupyterlab/notebook';
 import { UUID } from '@lumino/coreutils';
 import { decompressSavedContent } from './urlUtils';
 
 export function addTempNotebookRoute(
-    app: JupyterFrontEnd,
-    filebrowserFactory: IFileBrowserFactory,
-    router: IRouter
-  ): void {
-    if (router) {
-      app.commands.addCommand('notebook:start-nav', {
-        label: 'Open Temp Notebook from URL',
-        execute: async args => {
-          const { request } = args as IRouter.ILocation;
-          const url = new URL(`http://example.com${request}`);
-          const params = url.searchParams;
-          const isTempNotebook = params.get('tempNotebook');
-          const openAsNotebook = params.get('openAsNotebook') === '1';
-  
-          const createFromURLRoute = async () => {
-            router.routed.disconnect(createFromURLRoute);
-            if (isTempNotebook && isTempNotebook === '1') {
-                await app.commands.execute('notebook:open-temp', {openAsNotebook});
-            }
-          };
-  
-          router.routed.connect(createFromURLRoute);
-        }
-      });
-  
-      app.commands.addCommand('notebook:open-temp', {
-        label: 'Open Temporary Notebook',
-        execute: async args => {
-          const createNew = async (
-            cwd: string,
-            kernelId: string,
-            kernelName: string,
-            openAsNotebook: boolean
-          ) => {
-            const model = await app.commands.execute('docmanager:new-untitled', {
-              path: cwd,
-              type: 'notebook'
-            });
-  
-            if (model !== undefined ) {
-          
-              const widget = await app.commands.execute('docmanager:open', {
-                path: model.path,
-                factory: 'Notebook',
-                kernel: { id: kernelId, name: kernelName }
-              });
+  app: JupyterFrontEnd,
+  defaultFileBrowser: IDefaultFileBrowser,
+  filebrowserFactory: IFileBrowserFactory,
+  router: IRouter
+): void {
+  if (router) {
+    app.commands.addCommand('notebook:start-nav', {
+      label: 'Open Temp Notebook from URL',
+      execute: async args => {
+        const { request } = args as IRouter.ILocation;
+        const url = new URL(`http://example.com${request}`);
+        const params = url.searchParams;
+        const isTempNotebook = params.get('tempNotebook');
+        const openAsNotebook = params.get('openAsNotebook') === '1';
 
-  
-              widget.isUntitled = true;
-              const tempId = `temp-notebook-${UUID.uuid4()}`;
-              await widget.context.rename(tempId + '.ipynb');
-  
-              const content = decompressSavedContent();
-              if (content) {
-                const notebookModel = widget.context.model as NotebookModel;
-                notebookModel.fromJSON(content);
-                await widget.context.save();
-              }
-  
-              if (openAsNotebook) {
-                redirectToNotebookView(widget.context.path);
-              }
-  
-              return widget;
+        const createFromURLRoute = async () => {
+          router.routed.disconnect(createFromURLRoute);
+          if (isTempNotebook && isTempNotebook === '1') {
+            await app.commands.execute('notebook:open-temp', {
+              openAsNotebook
+            });
+          }
+        };
+
+        router.routed.connect(createFromURLRoute);
+      }
+    });
+
+    app.commands.addCommand('notebook:open-temp', {
+      label: 'Open Temporary Notebook',
+      execute: async args => {
+        const createNew = async (
+          cwd: string,
+          kernelId: string,
+          kernelName: string,
+          openAsNotebook: boolean
+        ) => {
+          const model = await app.commands.execute('docmanager:new-untitled', {
+            path: cwd,
+            type: 'notebook'
+          });
+
+          if (model !== undefined) {
+            const widget = await app.commands.execute('docmanager:open', {
+              path: model.path,
+              factory: 'Notebook',
+              kernel: { id: kernelId, name: kernelName }
+            });
+
+            widget.isUntitled = true;
+            const tempId = `temp-notebook-${UUID.uuid4()}`;
+            await widget.context.rename(tempId + '.ipynb');
+
+            const content = decompressSavedContent();
+            if (content) {
+              const notebookModel = widget.context.model as NotebookModel;
+              notebookModel.fromJSON(content);
+              await widget.context.save();
             }
-          };
-  
-          //@ts-ignore
-          const currentBrowser = filebrowserFactory?.tracker.currentWidget ?? filebrowserFactory.defaultBrowser;
-          const cwd = (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
-          const kernelId = (args['kernelId'] as string) || '';
-          const kernelName = (args['kernelName'] as string) || '';
-          const openAsNotebook = args['openAsNotebook'] as boolean;
-  
-          await createNew(cwd, kernelId, kernelName, openAsNotebook);
-        }
-      });
-    }
+
+            if (openAsNotebook) {
+              redirectToNotebookView(widget.context.path);
+            }
+
+            return widget;
+          }
+        };
+
+        const currentBrowser =
+          filebrowserFactory?.tracker.currentWidget ?? defaultFileBrowser;
+        const cwd =
+          (args['cwd'] as string) || (currentBrowser?.model.path ?? '');
+        const kernelId = (args['kernelId'] as string) || '';
+        const kernelName = (args['kernelName'] as string) || '';
+        const openAsNotebook = args['openAsNotebook'] as boolean;
+
+        await createNew(cwd, kernelId, kernelName, openAsNotebook);
+      }
+    });
   }
-  
+}
+
 import { getBasePath } from './urlUtils';
 
 function redirectToNotebookView(notebookPath: string) {
   const currentUrl = window.location.href;
   const basePath = getBasePath(currentUrl);
-  
+
   // Construct the new URL, ensuring we're using the 'notebooks' path
   const newUrl = new URL(`${basePath}/notebooks/index.html`);
-  
+
   // Add the notebook path as a query parameter
   newUrl.searchParams.set('path', notebookPath);
-  
+
   // // Preserve any existing query parameters
   // const currentUrlObj = new URL(currentUrl);
   // currentUrlObj.searchParams.forEach((value, key) => {
@@ -109,7 +114,7 @@ function redirectToNotebookView(notebookPath: string) {
   window.location.href = newUrl.toString();
 }
 
-  /*
+/*
 export function addTempNotebookRoute(
   app: JupyterFrontEnd,
   filebrowserFactory: IFileBrowserFactory,

@@ -14,7 +14,8 @@ export function decompressSavedContent(): any | null {
   if (savedParams) {
     const compressedContent = savedParams.get('notebook');
     if (compressedContent) {
-      const decompressedContent = LZString.decompressFromEncodedURIComponent(compressedContent);
+      const decompressedContent =
+        LZString.decompressFromEncodedURIComponent(compressedContent);
       const content = JSON.parse(decompressedContent);
       console.log('decompressedContent', content);
       return content;
@@ -22,38 +23,46 @@ export function decompressSavedContent(): any | null {
   }
   return null;
 }
-export function showToast(message: string, anchorEl: HTMLElement, duration = 2000) {
-    const toast = document.createElement('div');
-    toast.textContent = message;
-    toast.style.position = 'absolute';
-    toast.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
-    toast.style.color = 'white';
-    toast.style.padding = '10px 20px';
-    toast.style.borderRadius = '5px';
-    toast.style.zIndex = '1000';
-    toast.style.fontSize = '14px';
-  
-    // Position the toast
-    const rect = anchorEl.getBoundingClientRect();
-    toast.style.top = `${rect.bottom + 10}px`;
-    toast.style.left = `${rect.left}px`;
-  
-    document.body.appendChild(toast);
-  
-    setTimeout(() => {
-      toast.style.opacity = '0';
-      toast.style.transition = 'opacity 0.5s ease';
-      setTimeout(() => document.body.removeChild(toast), 500);
-    }, duration);
-  }
+export function showToast(
+  message: string,
+  anchorEl: HTMLElement,
+  duration = 2000
+) {
+  const toast = document.createElement('div');
+  toast.textContent = message;
+  toast.style.position = 'absolute';
+  toast.style.backgroundColor = 'rgba(0, 0, 0, 0.7)';
+  toast.style.color = 'white';
+  toast.style.padding = '10px 20px';
+  toast.style.borderRadius = '5px';
+  toast.style.zIndex = '1000';
+  toast.style.fontSize = '14px';
+
+  // Position the toast
+  const rect = anchorEl.getBoundingClientRect();
+  toast.style.top = `${rect.bottom + 10}px`;
+  toast.style.left = `${rect.left}px`;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.style.opacity = '0';
+    toast.style.transition = 'opacity 0.5s ease';
+    setTimeout(() => document.body.removeChild(toast), 500);
+  }, duration);
+}
 
 export async function compressNotebookContent(
   notebookPanel: any,
-  settings: { copyOutput: boolean; urlPath: string; openAsNotebook: boolean,  customUrl: string | null; },
+  settings: {
+    copyOutput: boolean;
+    urlPath: string;
+    openAsNotebook: boolean;
+    customUrl: string | null;
+  },
   anchorEl: HTMLElement
-
 ) {
-  let notebookContent: any = notebookPanel.context.model.toJSON();
+  const notebookContent: any = notebookPanel.context.model.toJSON();
 
   if (!settings.copyOutput) {
     notebookContent.cells = notebookContent.cells.map((cell: any) => {
@@ -91,7 +100,9 @@ export async function compressNotebookContent(
     }
   }
 
-  const compressedContent = LZString.compressToEncodedURIComponent(JSON.stringify(notebookContent));
+  const compressedContent = LZString.compressToEncodedURIComponent(
+    JSON.stringify(notebookContent)
+  );
 
   let url: URL;
 
@@ -100,10 +111,10 @@ export async function compressNotebookContent(
   } else {
     const currentUrl = window.location.href;
     const basePath = getBasePath(currentUrl);
-    
+
     // Ensure we're using 'lab' in the path, not 'notebooks'
     const labPath = settings.urlPath.replace('/notebooks/', '/lab/');
-    
+
     url = new URL(`${basePath}${labPath}`);
   }
 
@@ -111,7 +122,7 @@ export async function compressNotebookContent(
   url.hash = `notebook=${compressedContent}`;
   url.searchParams.set('tempNotebook', '1');
   url.searchParams.set('path', 'temp.ipynb');
-  
+
   if (settings.openAsNotebook) {
     url.searchParams.set('openAsNotebook', '1');
   }
@@ -120,13 +131,11 @@ export async function compressNotebookContent(
 
   const newUrl = url.toString();
 
-  Clipboard.copyToSystem(newUrl)
+  Clipboard.copyToSystem(newUrl);
   showToast('Copied to clipboard', anchorEl);
-  
-  
 }
 
-// gets base path for jupyter lite: 
+// gets base path for jupyter lite:
 export function getBasePath(currentUrl: string): string {
   const url = new URL(currentUrl);
   const pathParts = url.pathname.split('/');

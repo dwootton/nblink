@@ -22,8 +22,6 @@ To install the extension, run the following command in your environment:
 pip install nblink
 ```
 
-
-
 ### Installation on Jupyterlite
 
 If you are [deploying your own jupyterlite instance](https://jupyterlite.readthedocs.io/en/latest/quickstart/deploy.html), you can install nblink by adding it to your requirements.txt. See [adding additional requirements](https://jupyterlite.readthedocs.io/en/latest/quickstart/deploy.html#add-additional-requirements-to-the-deployment) to the deployment.
@@ -47,7 +45,7 @@ If you are [deploying your own jupyterlite instance](https://jupyterlite.readthe
 
 ## Architecture
 
-nblink is composed of two main components: compression and decompression. 
+nblink is composed of two main components: compression and decompression.
 
 ### Compression
 
