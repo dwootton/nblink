@@ -38,7 +38,7 @@ If you are [deploying your own jupyterlite instance](https://jupyterlite.readthe
 ![An image demonstrating the Save to URL and customization options.](image-1.png)
 
 1. Open a Jupyter notebook in JupyterLab.
-2. Look for the "Save to URL" button in the notebook toolbar.
+2. Look for the "Save to URL" button in the notebook toolbar. *note: in notebook views, the Save to URL button appears on the right hand side of the toolbar.*
 3. Click the main button to save the current content of your notebook to a URL.
 4. Use the settings icon (gear) next to the main button to configure options:
    - Toggle including cell outputs
